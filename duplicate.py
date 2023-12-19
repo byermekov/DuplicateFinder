@@ -4,6 +4,7 @@ from pathlib import Path
 import zlib
 # from PIL import Image
 import pickle
+import argparse
 
 HASH_CACHE_FILE = 'img_hash_cache.pkl'
 
@@ -12,20 +13,28 @@ ARG_HASH_SIZE = 6 # strict
 ARG_HASH_SIZE = 8 # super strict
 
 
-## SEARCH PATH
-ARG_SEARCH_FOLDERS = [
-    '/abc/xyz/xyz/' ## Set search path here
-]
+# ## SEARCH PATH
+# ARG_SEARCH_FOLDERS = [
+#     '/abc/xyz/xyz/' ## Set search path here
+# ]
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Duplicate Image Finder")
+    parser.add_argument("--folders", "-f", nargs="+", help="Folders to search for image files")
+    parser.add_argument("--hash_size", "-hs", type=int, default=5, help="Strictness of image hashing (default: 5)")
+    args = parser.parse_args()
+    if not args.folders:
+        parser.error("Please specify at least one folder to search for image files.")
 
 
 
-g_hash_cache = dict()
+    g_hash_cache = dict()
 
-image_files = []
-for folder in ARG_SEARCH_FOLDERS:
-    img_files = [ str(x) for x in Path(folder).rglob('*.*') ]
-    img_files = list(filter(lambda x: x.rsplit('.', 1)[-1].lower() in ['png', 'jpeg', 'jpg', 'bmp'], img_files))
-    image_files.extend(img_files)
+    image_files = []
+    for folder in args.folders:
+        img_files = [ str(x) for x in Path(folder).rglob('*.*') ]
+        img_files = list(filter(lambda x: x.rsplit('.', 1)[-1].lower() in ['png', 'jpeg', 'jpg', 'bmp'], img_files))
+        image_files.extend(img_files)
 
 
 def crc32(fileName):
